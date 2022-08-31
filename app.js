@@ -1,5 +1,5 @@
 // Music control
-const BASE_NOTE = 'C3'
+const BASE_NOTE = 'C4'
 const TIME_INTERVAL = 0.6
 const NUM_NOTES = 5
 
@@ -24,10 +24,12 @@ const TONE_VALUE_MAP = {
     'A#': 10,
     'B': 11,
 }
-// Used to determine the notes
-const selects = [] // populated in main
-const notes = []
-let isPlaying = false
+const STATE = {
+    selects: [], // select elements used in determining notes
+    notes: [],
+    isPlaying: false,
+    synth: new Tone.PolySynth().toDestination(),
+}
 
 window.addEventListener('load', main)
 
@@ -59,6 +61,16 @@ function uniformRange(lo, hi, exclude) {
     if (exclude && exclude.includes(val)) return uniformRange(lo, hi, exclude)
 
     return val
+}
+
+function collectNotes() {
+    let currNote = BASE_NOTE
+    STATE.notes.push(currNote)
+    STATE.selects.forEach(s => {
+        const interval = FEELINGS[s.value]
+        currNote = shiftNote(currNote, interval)
+        STATE.notes.push(currNote)
+    })
 }
 
 
@@ -108,7 +120,7 @@ function shiftNote(note, amt) {
 function mkSelect(idx) {
     const select = document.createElement('select')
     select.id = `option-${idx}`
-    selects.push(select)
+    STATE.selects.push(select)
 
     const div = document.createElement('div')
     document.querySelector('#selects').appendChild(div)
@@ -129,15 +141,15 @@ function mkSelect(idx) {
 }
 
 function togglePlaying() {
-    isPlaying = !isPlaying
-    if (isPlaying) {
+    STATE.isPlaying = !STATE.isPlaying
+    if (STATE.isPlaying) {
         play()
         document.querySelector('h1').style.animation = `rotation ${TIME_INTERVAL}s infinite linear`
         document.querySelector('#play').textContent = 'Stop'
     }
     else {
         // clear notes
-        while (notes.length > 0) notes.pop()
+        while (STATE.notes.length > 0) STATE.notes.pop()
 
         document.querySelector('#play').textContent = 'Play'
         document.querySelector('h1').style.animation = ''
@@ -145,22 +157,14 @@ function togglePlaying() {
 }
 
 async function play() {
-    const synth = new Tone.PolySynth().toDestination();
 
     // make notes
-    if (notes.length == 0) {
-        let currNote = BASE_NOTE
-        notes.push(currNote)
-        selects.forEach(s => {
-            const interval = FEELINGS[s.value]
-            currNote = shiftNote(currNote, interval)
-            notes.push(currNote)
-        })
-
+    if (STATE.notes.length == 0) {
+        collectNotes()
     }
 
-    const note = notes.shift()
-    console.log(notes)
+    const note = STATE.notes.shift()
+    console.log(STATE.notes)
     console.log(note)
     const [tone, _] = noteToToneOctave(note)
     
@@ -168,9 +172,9 @@ async function play() {
     document.querySelector('body').style.backgroundColor = valToColor(TONE_VALUE_MAP[tone])
 
     // play
-    synth.triggerAttack(note, Tone.now())
+    STATE.synth.triggerAttack(note, Tone.now())
     await timeout(TIME_INTERVAL*1000)
-    synth.triggerRelease(note, Tone.now())
+    STATE.synth.triggerRelease(note, Tone.now())
 
-    if (isPlaying) play()
+    if (STATE.isPlaying) play()
 }
