@@ -1,3 +1,19 @@
+@keyframes rotation {
+    0% {
+        transform: rotate(0deg);
+        font-size: 48px;
+    }
+    33% {
+        transform: rotate(5deg);
+    }
+    50% {
+        font-size: 60px;
+    }
+    67% {
+        transform: rotate(-5deg);
+    }
+}
+
 html, body {
     height: 100%;
 }
@@ -19,4 +35,16 @@ button {
     background: rgb(176, 255, 5);
     color: black;
     border: none;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+h1 {
+    /* animation: rotation 0.5s infinite linear; */
+    font-size: 48px;
+    margin-bottom: 50px;
 }

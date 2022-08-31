@@ -1,4 +1,4 @@
-const TIME_INTERVAL = 0.75
+const TIME_INTERVAL = 0.6
 const NUM_SELECTS = 5
 
 window.addEventListener('load', main)
@@ -65,7 +65,7 @@ function mkSelect(idx) {
     SELECTS.push(select)
 
     const div = document.createElement('div')
-    document.querySelector('main').appendChild(div)
+    document.querySelector('#selects').appendChild(div)
     div.appendChild(select)
 
 
@@ -114,8 +114,12 @@ function timeout(ms) {
 }
 
 async function play() {
+    // start animation
+    document.querySelector('h1').style.animation = `rotation ${TIME_INTERVAL}s infinite linear`
+
     const synth = new Tone.PolySynth().toDestination();
 
+    // make notes
     const notes = [BASE_NOTE]
     let currNote = BASE_NOTE
     SELECTS.forEach(s => {
@@ -124,13 +128,20 @@ async function play() {
         notes.push(currNote)
     })
     
+    // play notes, change background
     for (let i = 0; i < notes.length; i++) {
+
         const note = notes[i]
         const [tone, _] = noteToToneOctave(note)
         
+        // change background
         document.querySelector('body').style.backgroundColor = valToColor(TONE_VALUE_MAP[tone])
+
+        // play
         synth.triggerAttack(note, Tone.now())
         await timeout(TIME_INTERVAL*1000)
         synth.triggerRelease(note, Tone.now())
     }
+
+    play()
 }
