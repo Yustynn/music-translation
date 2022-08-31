@@ -7,3 +7,15 @@ body {
     color: white;
     font-family: Roboto;
 }
+
+select {
+    margin: 5px;
+    padding: 10px 5px;
+}
+
+button {
+    padding: 20px 40px;
+    background: rgb(176, 255, 5);
+    color: black;
+    border: none;
+}

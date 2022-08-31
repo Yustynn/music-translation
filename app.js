@@ -21,8 +21,13 @@ const SEMITONE_MAP = {
 const BASE_NOTE = 'C3'
 const SELECTS = []
 
-function uniformRange(lo, hi) {
-    return Math.floor(Math.random() * (hi-lo) + lo + 0.5)
+function uniformRange(lo, hi, exclude) {
+    const val =  Math.floor(Math.random() * (hi-lo) + lo + 0.5)
+
+    // if should be excluded, try again
+    if (exclude && exclude.includes(val)) return uniformRange(lo, hi, exclude)
+
+    return val
 }
 
 function mkSelect(idx) {
@@ -43,9 +48,9 @@ function mkSelect(idx) {
         select.appendChild(option)
     })
 
-    const values = Object.values(FEELINGS)
-    const val = uniformRange(Math.min(...values), Math.max(...values))
-    select.value = Object.keys(FEELINGS).find(f => FEELINGS[f] == val)
+    const intervals = Object.values(FEELINGS)
+    const interval = uniformRange(Math.min(...intervals), Math.max(...intervals), [0])
+    select.value = Object.keys(FEELINGS).find(f => FEELINGS[f] == interval)
 }
 
 function shiftNote(noteWithOctave, amt) {
@@ -82,12 +87,8 @@ function play() {
         notes.push(currNote)
     })
 
-    console.log('Notes', notes)
-
-
     notes.forEach((note, idx) => {
         synth.triggerAttack(note, now + idx*TIME_INTERVAL)
         synth.triggerRelease(note, now + (idx+1)*TIME_INTERVAL)
     })
-    console.log('played?')
 }
