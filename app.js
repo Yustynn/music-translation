@@ -55,6 +55,7 @@ function shiftNote(noteWithOctave, amt) {
     let newVal = SEMITONE_MAP[note] + amt
     const newOctave = octave + Math.floor(newVal / 12)
     while (newVal < 0) newVal += 12
+    newVal %= 12
 
     const newNote = Object.keys(SEMITONE_MAP).find(k => SEMITONE_MAP[k] == newVal)
 
