@@ -11,18 +11,18 @@ const COLOR3 = [238, 41, 187]
 
 // Used for calculations
 const TONE_VALUE_MAP = {
-    'A': 0,
-    'A#': 1,
-    'B': 2,
-    'C': 3,
-    'C#': 4,
-    'D': 5,
-    'D#': 6,
-    'E': 7,
-    'F': 8,
-    'F#': 9,
-    'G': 10,
-    'G#': 11,
+    'C': 0,
+    'C#': 1,
+    'D': 2,
+    'D#': 3,
+    'E': 4,
+    'F': 5,
+    'F#': 6,
+    'G': 7,
+    'G#': 8,
+    'A': 9,
+    'A#': 10,
+    'B': 11,
 }
 // Used to determine the notes
 const selects = [] // populated in main

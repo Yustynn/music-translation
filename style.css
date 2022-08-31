@@ -30,13 +30,6 @@ select {
     padding: 10px 5px;
 }
 
-button {
-    padding: 20px 40px;
-    background: rgb(176, 255, 5);
-    color: black;
-    border: none;
-}
-
 main {
     display: flex;
     flex-direction: column;
@@ -46,4 +39,12 @@ main {
 h1 {
     font-size: 48px;
     margin-bottom: 50px;
+}
+
+#play {
+    padding: 20px 60px;
+    background: rgb(176, 255, 5);
+    color: black;
+    border: none;
+    margin-top: 30px;
 }
