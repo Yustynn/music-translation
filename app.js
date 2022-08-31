@@ -1,8 +1,15 @@
+// Music control
+const BASE_NOTE = 'C3'
 const TIME_INTERVAL = 0.6
-const NUM_SELECTS = 5
+const NUM_NOTES = 5
 
-window.addEventListener('load', main)
+// Background color transition breakpoints
+const COLOR1 = [128, 128, 255]
+const COLOR2 = [202, 120, 5]
+const COLOR3 = [238, 41, 187]
 
+
+// Used for calculations
 const TONE_VALUE_MAP = {
     'A': 0,
     'A#': 1,
@@ -17,6 +24,44 @@ const TONE_VALUE_MAP = {
     'G': 10,
     'G#': 11,
 }
+// Used to determine the notes
+const SELECTS = [] // populated in main
+
+window.addEventListener('load', main)
+
+function main() {
+    const btn = document.querySelector('#play')
+    btn.onclick = play
+
+    for (let i = 0; i < NUM_NOTES; i++) mkSelect(i)
+}
+
+
+/* UTILITY FUNCTIONS */
+
+function noteToToneOctave(note) {
+    const tone = note.match(/\D+/)[0].toUpperCase()
+    const octave = +note.match(/\d+/)[0]
+
+    return [tone, octave]
+}
+
+
+function timeout(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function uniformRange(lo, hi, exclude) {
+    const val =  Math.floor(Math.random() * (hi-lo) + lo + 0.5)
+
+    // if should be excluded, try again
+    if (exclude && exclude.includes(val)) return uniformRange(lo, hi, exclude)
+
+    return val
+}
+
+
+/* MANIPULATION FUNCTIONS */
 
 function valToColor(val) {
     let c1, c2
@@ -43,21 +88,21 @@ function valToColor(val) {
     return `rgb(${c})`
 }
 
-const COLOR1 = [128, 128, 255]
-const COLOR2 = [202, 120, 5]
-const COLOR3 = [238, 41, 187]
+function shiftNote(note, amt) {
+    const [tone, octave] = noteToToneOctave(note)
 
-const BASE_NOTE = 'C3'
-const SELECTS = []
+    let newVal = TONE_VALUE_MAP[tone] + amt
+    const newOctave = octave + Math.floor(newVal / 12)
+    while (newVal < 0) newVal += 12
+    newVal %= 12
 
-function uniformRange(lo, hi, exclude) {
-    const val =  Math.floor(Math.random() * (hi-lo) + lo + 0.5)
+    const newNote = Object.keys(TONE_VALUE_MAP).find(k => TONE_VALUE_MAP[k] == newVal)
 
-    // if should be excluded, try again
-    if (exclude && exclude.includes(val)) return uniformRange(lo, hi, exclude)
-
-    return val
+    return `${newNote}${newOctave}`
 }
+
+
+/* PROGRAM FUNCTIONS */
 
 function mkSelect(idx) {
     const select = document.createElement('select')
@@ -82,36 +127,6 @@ function mkSelect(idx) {
     select.value = Object.keys(FEELINGS).find(f => FEELINGS[f] == interval)
 }
 
-function noteToToneOctave(note) {
-    const tone = note.match(/\D+/)[0].toUpperCase()
-    const octave = +note.match(/\d+/)[0]
-
-    return [tone, octave]
-}
-
-function shiftNote(note, amt) {
-    const [tone, octave] = noteToToneOctave(note)
-
-    let newVal = TONE_VALUE_MAP[tone] + amt
-    const newOctave = octave + Math.floor(newVal / 12)
-    while (newVal < 0) newVal += 12
-    newVal %= 12
-
-    const newNote = Object.keys(TONE_VALUE_MAP).find(k => TONE_VALUE_MAP[k] == newVal)
-
-    return `${newNote}${newOctave}`
-}
-
-function main() {
-    const btn = document.querySelector('#play')
-    for (let i = 0; i < NUM_SELECTS; i++) mkSelect(i)
-
-    btn.onclick = play
-}
-
-function timeout(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
 
 async function play() {
     // start animation
