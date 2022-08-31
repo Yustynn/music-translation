@@ -27,12 +27,12 @@ const TONE_VALUE_MAP = {
 // Used to determine the notes
 const selects = [] // populated in main
 const notes = []
+let isPlaying = false
 
 window.addEventListener('load', main)
 
 function main() {
-    const btn = document.querySelector('#play')
-    btn.onclick = play
+    document.querySelector('#play').onclick = togglePlaying
 
     for (let i = 0; i < NUM_NOTES; i++) mkSelect(i)
 }
@@ -128,11 +128,23 @@ function mkSelect(idx) {
     select.value = Object.keys(FEELINGS).find(f => FEELINGS[f] == interval)
 }
 
+function togglePlaying() {
+    isPlaying = !isPlaying
+    if (isPlaying) {
+        play()
+        document.querySelector('h1').style.animation = `rotation ${TIME_INTERVAL}s infinite linear`
+        document.querySelector('#play').textContent = 'Stop'
+    }
+    else {
+        // clear notes
+        while (notes.length > 0) notes.pop()
+
+        document.querySelector('#play').textContent = 'Play'
+        document.querySelector('h1').style.animation = ''
+    }
+}
 
 async function play() {
-    // start animation
-    document.querySelector('h1').style.animation = `rotation ${TIME_INTERVAL}s infinite linear`
-
     const synth = new Tone.PolySynth().toDestination();
 
     // make notes
@@ -160,5 +172,5 @@ async function play() {
     await timeout(TIME_INTERVAL*1000)
     synth.triggerRelease(note, Tone.now())
 
-    play()
+    if (isPlaying) play()
 }
