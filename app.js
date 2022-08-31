@@ -3,7 +3,7 @@ const NUM_SELECTS = 5
 
 window.addEventListener('load', main)
 
-const SEMITONE_MAP = {
+const TONE_VALUE_MAP = {
     'A': 0,
     'A#': 1,
     'B': 2,
@@ -17,6 +17,35 @@ const SEMITONE_MAP = {
     'G': 10,
     'G#': 11,
 }
+
+function valToColor(val) {
+    let c1, c2
+    if (val <= 4) {
+        c1 = COLOR1
+        c2 = COLOR2
+    }
+    else if (val <= 8) {
+        c1 = COLOR2
+        c2 = COLOR3
+    }
+    else {
+        c1 = COLOR3
+        c2 = COLOR1
+    }
+
+    x = (val % 4) / 4
+    y = 1-x
+
+    const c = c1
+        .map((v, idx) => Math.round(x*v + y*c2[idx]))
+        .join(',')
+
+    return `rgb(${c})`
+}
+
+const COLOR1 = [128, 128, 255]
+const COLOR2 = [202, 120, 5]
+const COLOR3 = [238, 41, 187]
 
 const BASE_NOTE = 'C3'
 const SELECTS = []
@@ -53,16 +82,22 @@ function mkSelect(idx) {
     select.value = Object.keys(FEELINGS).find(f => FEELINGS[f] == interval)
 }
 
-function shiftNote(noteWithOctave, amt) {
-    const note = noteWithOctave.match(/\D+/)[0].toUpperCase()
-    const octave = +noteWithOctave.match(/\d+/)[0]
+function noteToToneOctave(note) {
+    const tone = note.match(/\D+/)[0].toUpperCase()
+    const octave = +note.match(/\d+/)[0]
 
-    let newVal = SEMITONE_MAP[note] + amt
+    return [tone, octave]
+}
+
+function shiftNote(note, amt) {
+    const [tone, octave] = noteToToneOctave(note)
+
+    let newVal = TONE_VALUE_MAP[tone] + amt
     const newOctave = octave + Math.floor(newVal / 12)
     while (newVal < 0) newVal += 12
     newVal %= 12
 
-    const newNote = Object.keys(SEMITONE_MAP).find(k => SEMITONE_MAP[k] == newVal)
+    const newNote = Object.keys(TONE_VALUE_MAP).find(k => TONE_VALUE_MAP[k] == newVal)
 
     return `${newNote}${newOctave}`
 }
@@ -74,11 +109,13 @@ function main() {
     btn.onclick = play
 }
 
-function play() {
-    const synth = new Tone.PolySynth().toDestination();
-    const now = Tone.now()
+function timeout(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
-    //create a synth and connect it to the main output (your speakers)
+async function play() {
+    const synth = new Tone.PolySynth().toDestination();
+
     const notes = [BASE_NOTE]
     let currNote = BASE_NOTE
     SELECTS.forEach(s => {
@@ -86,9 +123,14 @@ function play() {
         currNote = shiftNote(currNote, interval)
         notes.push(currNote)
     })
-
-    notes.forEach((note, idx) => {
-        synth.triggerAttack(note, now + idx*TIME_INTERVAL)
-        synth.triggerRelease(note, now + (idx+1)*TIME_INTERVAL)
-    })
+    
+    for (let i = 0; i < notes.length; i++) {
+        const note = notes[i]
+        const [tone, _] = noteToToneOctave(note)
+        
+        document.querySelector('body').style.backgroundColor = valToColor(TONE_VALUE_MAP[tone])
+        synth.triggerAttack(note, Tone.now())
+        await timeout(TIME_INTERVAL*1000)
+        synth.triggerRelease(note, Tone.now())
+    }
 }

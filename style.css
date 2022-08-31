@@ -6,6 +6,7 @@ body {
     background-color: rgb(34, 34, 58);
     color: white;
     font-family: Roboto;
+    transition-duration: 0.2s;
 }
 
 select {
