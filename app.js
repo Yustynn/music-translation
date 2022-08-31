@@ -21,6 +21,10 @@ const SEMITONE_MAP = {
 const BASE_NOTE = 'C3'
 const SELECTS = []
 
+function uniformRange(lo, hi) {
+    return Math.floor(Math.random() * (hi-lo) + lo + 0.5)
+}
+
 function mkSelect(idx) {
     const select = document.createElement('select')
     select.id = `option-${idx}`
@@ -39,7 +43,9 @@ function mkSelect(idx) {
         select.appendChild(option)
     })
 
-    select.value = Object.keys(FEELINGS).find(f => FEELINGS[f] == 0)
+    const values = Object.values(FEELINGS)
+    const val = uniformRange(Math.min(...values), Math.max(...values))
+    select.value = Object.keys(FEELINGS).find(f => FEELINGS[f] == val)
 }
 
 function shiftNote(noteWithOctave, amt) {
@@ -73,8 +79,9 @@ function play() {
         const interval = FEELINGS[s.value]
         currNote = shiftNote(currNote, interval)
         notes.push(currNote)
-        
     })
+
+    console.log('Notes', notes)
 
 
     notes.forEach((note, idx) => {
